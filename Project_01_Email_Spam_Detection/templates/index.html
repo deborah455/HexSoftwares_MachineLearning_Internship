@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Email Spam Detector</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+            background: #f5f7fb;
+            color: #1f2937;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: auto;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .hero {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .hero-icon {
+            font-size: 52px;
+            margin-bottom: 10px;
+        }
+
+        .hero h1 {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+
+        .hero p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        /* =========================
+           CARD
+        ========================= */
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+        }
+
+        /* =========================
+           FORM
+        ========================= */
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 220px;
+            resize: vertical;
+            padding: 17px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            outline: none;
+            transition: border 0.2s ease;
+        }
+
+        textarea:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .counter {
+            text-align: right;
+            color: #9ca3af;
+            font-size: 13px;
+            margin: 7px 0 16px;
+        }
+
+        .check-button {
+            width: 100%;
+            border: none;
+            border-radius: 11px;
+            padding: 15px;
+            background: #4f46e5;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s ease,
+                        transform 0.2s ease;
+        }
+
+        .check-button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* =========================
+           RESULT
+        ========================= */
+
+        .result {
+            margin-top: 25px;
+            padding: 28px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .spam-result {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .safe-result {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .result-icon {
+            font-size: 42px;
+            margin-bottom: 8px;
+        }
+
+        .result h2 {
+            font-size: 25px;
+            margin-bottom: 8px;
+        }
+
+        .confidence {
+            font-size: 15px;
+        }
+
+        /* =========================
+           HISTORY
+        ========================= */
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .history-header h2 {
+            font-size: 22px;
+        }
+
+        .clear-button {
+            border: none;
+            border-radius: 8px;
+            padding: 8px 13px;
+            background: #e5e7eb;
+            color: #374151;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .clear-button:hover {
+            background: #d1d5db;
+        }
+
+        .history-item {
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 11px;
+            margin-bottom: 10px;
+        }
+
+        .history-message {
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        .history-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .history-spam {
+            color: #dc2626;
+        }
+
+        .history-safe {
+            color: #16a34a;
+        }
+
+        .empty {
+            color: #9ca3af;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .footer {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+            margin-top: 25px;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 600px) {
+
+            body {
+                padding: 25px 15px;
+            }
+
+            .hero h1 {
+                font-size: 30px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .history-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- =========================
+         HEADER
+    ========================= -->
+
+    <div class="hero">
+
+        <div class="hero-icon">
+            📧
+        </div>
+
+        <h1>
+            Email Spam Detector
+        </h1>
+
+        <p>
+            Machine Learning powered email spam classification
+        </p>
+
+    </div>
+
+
+    <!-- =========================
+         EMAIL CLASSIFIER
+    ========================= -->
+
+    <div class="card">
+
+        <form method="POST">
+
+            <label for="message">
+                Enter an email message
+            </label>
+
+            <textarea
+                id="message"
+                name="message"
+                maxlength="5000"
+                placeholder="Paste or type an email message here..."
+                required
+            >{{ message }}</textarea>
+
+            <div class="counter">
+                <span id="count">0</span>
+                / 5000 characters
+            </div>
+
+            <button
+                type="submit"
+                class="check-button"
+            >
+                🔍 Analyze Email
+            </button>
+
+        </form>
+
+
+        <!-- =========================
+             PREDICTION RESULT
+        ========================= -->
+
+        {% if prediction %}
+
+        <div
+            id="prediction-result"
+            class="result
+            {% if prediction == 'Spam' %}
+                spam-result
+            {% else %}
+                safe-result
+            {% endif %}"
+        >
+
+            <div class="result-icon">
+
+                {% if prediction == 'Spam' %}
+
+                    🚨
+
+                {% else %}
+
+                    ✅
+
+                {% endif %}
+
+            </div>
+
+
+            <h2>
+
+                {% if prediction == 'Spam' %}
+
+                    Spam Detected
+
+                {% else %}
+
+                    Not Spam
+
+                {% endif %}
+
+            </h2>
+
+
+            <p class="confidence">
+
+                Model confidence:
+
+                <strong>
+                    {{ confidence }}%
+                </strong>
+
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =========================
+         RECENT PREDICTIONS
+    ========================= -->
+
+    <div class="card">
+
+        <div class="history-header">
+
+            <h2>
+                📊 Recent Predictions
+            </h2>
+
+
+            {% if history %}
+
+            <form
+                method="POST"
+                action="/clear-history"
+            >
+
+                <button
+                    type="submit"
+                    class="clear-button"
+                >
+                    Clear History
+                </button>
+
+            </form>
+
+            {% endif %}
+
+        </div>
+
+
+        {% if history %}
+
+            {% for item in history %}
+
+            <div class="history-item">
+
+                <div class="history-message">
+                    {{ item.message }}
+                </div>
+
+
+                <div class="history-meta">
+
+                    <span
+                        class="{% if item.prediction == 'Spam' %}
+                            history-spam
+                        {% else %}
+                            history-safe
+                        {% endif %}"
+                    >
+
+                        {% if item.prediction == 'Spam' %}
+
+                            🚨 Spam
+
+                        {% else %}
+
+                            ✅ Not Spam
+
+                        {% endif %}
+
+                    </span>
+
+
+                    <span>
+                        {{ item.confidence }}% confidence
+                    </span>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+
+                No predictions yet.
+
+                Analyze an email to see your results here.
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =========================
+         FOOTER
+    ========================= -->
+
+    <div class="footer">
+
+        TF-IDF + Multinomial Naive Bayes
+        · Hex Software Machine Learning Internship
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     CHARACTER COUNTER ONLY
+     ========================= -->
+
+<script>
+
+    const textarea =
+        document.getElementById("message");
+
+    const counter =
+        document.getElementById("count");
+
+
+    function updateCounter() {
+
+        counter.textContent =
+            textarea.value.length;
+
+    }
+
+
+    textarea.addEventListener(
+        "input",
+        updateCounter
+    );
+
+
+    updateCounter();
+
+</script>
+
+</body>
+</html>
