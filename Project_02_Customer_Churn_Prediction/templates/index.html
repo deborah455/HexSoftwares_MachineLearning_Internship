@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Telecom Customer Churn Prediction System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Inter, Arial, sans-serif;
+            background: #f5f7fb;
+            color: #172033;
+        }
+
+        .topbar {
+            background: #111827;
+            color: white;
+            padding: 18px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .badge {
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #1f2937;
+            color: #cbd5e1;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #111827, #1e3a5f);
+            color: white;
+            padding: 55px 7%;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .hero h1 {
+            font-size: 38px;
+            line-height: 1.15;
+            margin-bottom: 14px;
+        }
+
+        .hero p {
+            color: #cbd5e1;
+            font-size: 16px;
+            max-width: 680px;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 86%;
+            max-width: 1200px;
+            margin: -30px auto 50px;
+            position: relative;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1.5fr 0.8fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 7px;
+            color: #374151;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #dbe1ea;
+            border-radius: 8px;
+            background: #fff;
+            color: #1f2937;
+            font-size: 14px;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .button {
+            width: 100%;
+            border: none;
+            border-radius: 9px;
+            padding: 14px;
+            background: #2563eb;
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .button:hover {
+            background: #1d4ed8;
+        }
+
+        .result-card {
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .result-label {
+            color: #64748b;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .prediction {
+            font-size: 27px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .probability {
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 18px;
+        }
+
+        .risk {
+            display: inline-block;
+            margin: auto;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .high {
+            color: #b91c1c;
+            background: #fee2e2;
+        }
+
+        .medium {
+            color: #b45309;
+            background: #fef3c7;
+        }
+
+        .low {
+            color: #15803d;
+            background: #dcfce7;
+        }
+
+        .empty-state {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .empty-icon {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        .model-info {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        .model-info div {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            font-size: 13px;
+        }
+
+        .model-info span:first-child {
+            color: #64748b;
+        }
+
+        .model-info span:last-child {
+            font-weight: 700;
+        }
+
+        .footer {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            padding: 0 20px 30px;
+        }
+
+        @media (max-width: 850px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 30px;
+            }
+
+            .container {
+                width: 92%;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                padding: 15px 5%;
+            }
+
+            .hero {
+                padding: 40px 5%;
+            }
+
+            .container {
+                margin-top: -20px;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <!-- TOP BAR -->
+
+    <header class="topbar">
+
+        <div class="brand">
+            Telecom ML Analytics
+        </div>
+
+        <div class="badge">
+            MACHINE LEARNING SYSTEM
+        </div>
+
+    </header>
+
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <div class="hero-content">
+
+            <h1>
+                Telecom Customer Churn Prediction System
+            </h1>
+
+            <p>
+                Analyze customer account and service information to
+                estimate churn probability and identify customers who
+                may be at risk of leaving the telecom service.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="container">
+
+        <div class="layout">
+
+
+            <!-- CUSTOMER FORM -->
+
+            <div class="card">
+
+                <h2>Customer Profile</h2>
+
+                <p class="subtitle">
+                    Enter the customer's current account and service details.
+                </p>
+
+
+                <!-- CUSTOMER DETAILS -->
+
+                <div class="section">
+
+                    <div class="section-title">
+                        Customer Details
+                    </div>
+
+                    <div class="grid">
+
+                        <div class="field">
+
+                            <label>Gender</label>
+
+                            <select name="gender" form="prediction-form" required>
+
+                                <option value="Female">Female</option>
+                                <option value="Male">Male</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Senior Citizen</label>
+
+                            <select name="SeniorCitizen" form="prediction-form" required>
+
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Partner</label>
+
+                            <select name="Partner" form="prediction-form" required>
+
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Dependents</label>
+
+                            <select name="Dependents" form="prediction-form" required>
+
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Tenure (Months)</label>
+
+                            <input
+                                type="number"
+                                name="tenure"
+                                form="prediction-form"
+                                min="0"
+                                value="12"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SERVICES -->
+
+                <div class="section">
+
+                    <div class="section-title">
+                        Services
+                    </div>
+
+                    <div class="grid">
+
+                        <div class="field">
+
+                            <label>Phone Service</label>
+
+                            <select name="PhoneService" form="prediction-form" required>
+
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Multiple Lines</label>
+
+                            <select name="MultipleLines" form="prediction-form" required>
+
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No phone service">
+                                    No phone service
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Internet Service</label>
+
+                            <select name="InternetService" form="prediction-form" required>
+
+                                <option value="DSL">DSL</option>
+                                <option value="Fiber optic">Fiber optic</option>
+                                <option value="No">No</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Online Security</label>
+
+                            <select name="OnlineSecurity" form="prediction-form" required>
+
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No internet service">
+                                    No internet service
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Online Backup</label>
+
+                            <select name="OnlineBackup" form="prediction-form" required>
+
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No internet service">
+                                    No internet service
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Device Protection</label>
+
+                            <select name="DeviceProtection" form="prediction-form" required>
+
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No internet service">
+                                    No internet service
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Tech Support</label>
+
+                            <select name="TechSupport" form="prediction-form" required>
+
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No internet service">
+                                    No internet service
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Streaming TV</label>
+
+                            <select name="StreamingTV" form="prediction-form" required>
+
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No internet service">
+                                    No internet service
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Streaming Movies</label>
+
+                            <select name="StreamingMovies" form="prediction-form" required>
+
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No internet service">
+                                    No internet service
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BILLING -->
+
+                <div class="section">
+
+                    <div class="section-title">
+                        Contract & Billing
+                    </div>
+
+                    <div class="grid">
+
+                        <div class="field">
+
+                            <label>Contract</label>
+
+                            <select name="Contract" form="prediction-form" required>
+
+                                <option value="Month-to-month">
+                                    Month-to-month
+                                </option>
+
+                                <option value="One year">
+                                    One year
+                                </option>
+
+                                <option value="Two year">
+                                    Two year
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Paperless Billing</label>
+
+                            <select name="PaperlessBilling" form="prediction-form" required>
+
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Payment Method</label>
+
+                            <select name="PaymentMethod" form="prediction-form" required>
+
+                                <option value="Electronic check">
+                                    Electronic check
+                                </option>
+
+                                <option value="Mailed check">
+                                    Mailed check
+                                </option>
+
+                                <option value="Bank transfer (automatic)">
+                                    Bank transfer (automatic)
+                                </option>
+
+                                <option value="Credit card (automatic)">
+                                    Credit card (automatic)
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Monthly Charges</label>
+
+                            <input
+                                type="number"
+                                name="MonthlyCharges"
+                                form="prediction-form"
+                                step="0.01"
+                                value="70"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>Total Charges</label>
+
+                            <input
+                                type="number"
+                                name="TotalCharges"
+                                form="prediction-form"
+                                step="0.01"
+                                value="840"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <form
+                    id="prediction-form"
+                    method="POST"
+                    action="/"
+                >
+
+                    <button class="button" type="submit">
+                        Analyze Customer Churn Risk
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- RESULT -->
+
+            <div class="card result-card">
+
+                {% if prediction %}
+
+                    <div class="result-label">
+                        Prediction Result
+                    </div>
+
+                    <div class="prediction">
+                        {{ prediction }}
+                    </div>
+
+                    <div class="probability
+                        {% if risk == 'High Risk' %}
+                            high
+                        {% elif risk == 'Medium Risk' %}
+                            medium
+                        {% else %}
+                            low
+                        {% endif %}
+                    ">
+
+                        {{ probability }}%
+
+                    </div>
+
+                    <div class="risk
+                        {% if risk == 'High Risk' %}
+                            high
+                        {% elif risk == 'Medium Risk' %}
+                            medium
+                        {% else %}
+                            low
+                        {% endif %}
+                    ">
+
+                        {{ risk }}
+
+                    </div>
+
+
+                    <div class="model-info">
+
+                        <div>
+                            <span>Model</span>
+                            <span>Logistic Regression</span>
+                        </div>
+
+                        <div>
+                            <span>Task</span>
+                            <span>Binary Classification</span>
+                        </div>
+
+                        <div>
+                            <span>Prediction</span>
+                            <span>Customer Churn</span>
+                        </div>
+
+                    </div>
+
+
+                {% else %}
+
+                    <div class="empty-icon">
+                        📊
+                    </div>
+
+                    <div class="result-label">
+                        Churn Risk Analysis
+                    </div>
+
+                    <h2>
+                        No prediction yet
+                    </h2>
+
+                    <p class="empty-state">
+                        Enter the customer's information and click
+                        <strong>Analyze Customer Churn Risk</strong>
+                        to generate a prediction.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <div class="footer">
+
+        Telecom Customer Churn Prediction System ·
+        Machine Learning Project
+
+    </div>
+
+</body>
+
+</html>
